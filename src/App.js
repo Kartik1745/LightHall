@@ -19,19 +19,21 @@ function App() {
   }, []);
 
   useEffect(() => {
-    axios
-      .get("https://example.com/api/clicks")
-      .then((response) => {
-        setClickCount(response.data.count);
-        setClickDistribution(response.data.distribution);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
+    if (userCountry) {
+      axios
+        .get(`https://example.com/api/clicks?country=${userCountry}`)
+        .then((response) => {
+          setClickCount(response.data.count);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [userCountry]);
 
   const handleClick = () => {
     setClickCount((count) => count + 1);
+
     axios
       .post("https://example.com/api/clicks", {
         country: userCountry,
@@ -46,12 +48,11 @@ function App() {
 
   const handleGeoClick = (e) => {
     const { name } = e.target;
+
     axios
-      .post("https://example.com/api/clicks", {
-        country: name,
-      })
+      .get(`https://example.com/api/clicks?country=${name}`)
       .then((response) => {
-        setClickDistribution(response.data.distribution);
+        setClickCount(response.data.count);
       })
       .catch((error) => {
         console.log(error);
@@ -84,7 +85,7 @@ function App() {
             <tr>
               <td>{userCountry} (you)</td>
               <td onClick={handleGeoClick} name={userCountry}>
-                {clickDistribution[userCountry] || 0}
+                {clickCount}
               </td>
             </tr>
           )}
