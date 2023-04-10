@@ -1,4 +1,3 @@
-import logo from './logo.svg';
 import './App.css';
 import { useEffect, useState } from 'react';
 
@@ -28,10 +27,14 @@ function App() {
 
   const handleGeoClick = (e) => {
     const { name } = e.target;
-    setClickDistribution((distribution) => ({
-      ...distribution,
-      [name]: (distribution[name] || 0) + 1,
-    }));
+    setClickDistribution((distribution) => {
+      const updatedDistribution = {
+        ...distribution,
+        [name]: (distribution[name] || 0) + 1,
+      };
+      localStorage.setItem("clickDistribution", JSON.stringify(updatedDistribution));
+      return updatedDistribution;
+    });
   };
 
   return (
