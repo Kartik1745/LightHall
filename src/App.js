@@ -7,21 +7,7 @@ function App() {
   const [clickDistribution, setClickDistribution] = useState({});
   const [userCountry, setUserCountry] = useState("");
 
-  const handleClick = () => {
-    setClickCount((count) => count + 1);
-  };
-
   useEffect(() => {
-    const storedCount = parseInt(localStorage.getItem("clickCount"));
-    if (!isNaN(storedCount)) {
-      setClickCount(storedCount);
-    }
-    const storedDistribution = JSON.parse(localStorage.getItem("clickDistribution"));
-    if (storedDistribution) {
-      setClickDistribution(storedDistribution);
-    }
-
-    // Fetch the user's country based on their IP address
     axios
       .get("https://ipapi.co/json/")
       .then((response) => {
@@ -33,16 +19,43 @@ function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("clickCount", clickCount.toString());
-    localStorage.setItem("clickDistribution", JSON.stringify(clickDistribution));
-  }, [clickCount, clickDistribution]);
+    axios
+      .get("https://example.com/api/clicks")
+      .then((response) => {
+        setClickCount(response.data.count);
+        setClickDistribution(response.data.distribution);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  }, []);
+
+  const handleClick = () => {
+    setClickCount((count) => count + 1);
+    axios
+      .post("https://example.com/api/clicks", {
+        country: userCountry,
+      })
+      .then((response) => {
+        setClickDistribution(response.data.distribution);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const handleGeoClick = (e) => {
     const { name } = e.target;
-    setClickDistribution((distribution) => ({
-      ...distribution,
-      [name]: (distribution[name] || 0) + 1,
-    }));
+    axios
+      .post("https://example.com/api/clicks", {
+        country: name,
+      })
+      .then((response) => {
+        setClickDistribution(response.data.distribution);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   return (
