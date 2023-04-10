@@ -1,9 +1,11 @@
 import './App.css';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 function App() {
   const [clickCount, setClickCount] = useState(0);
   const [clickDistribution, setClickDistribution] = useState({});
+  const [userCountry, setUserCountry] = useState("");
 
   const handleClick = () => {
     setClickCount((count) => count + 1);
@@ -18,6 +20,16 @@ function App() {
     if (storedDistribution) {
       setClickDistribution(storedDistribution);
     }
+
+    // Fetch the user's country based on their IP address
+    axios
+      .get("https://ipapi.co/json/")
+      .then((response) => {
+        setUserCountry(response.data.country_name);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   }, []);
 
   useEffect(() => {
@@ -27,14 +39,10 @@ function App() {
 
   const handleGeoClick = (e) => {
     const { name } = e.target;
-    setClickDistribution((distribution) => {
-      const updatedDistribution = {
-        ...distribution,
-        [name]: (distribution[name] || 0) + 1,
-      };
-      localStorage.setItem("clickDistribution", JSON.stringify(updatedDistribution));
-      return updatedDistribution;
-    });
+    setClickDistribution((distribution) => ({
+      ...distribution,
+      [name]: (distribution[name] || 0) + 1,
+    }));
   };
 
   return (
@@ -59,6 +67,14 @@ function App() {
               </td>
             </tr>
           ))}
+          {userCountry && (
+            <tr>
+              <td>{userCountry} (you)</td>
+              <td onClick={handleGeoClick} name={userCountry}>
+                {clickDistribution[userCountry] || 0}
+              </td>
+            </tr>
+          )}
         </tbody>
       </table>
     </div>
